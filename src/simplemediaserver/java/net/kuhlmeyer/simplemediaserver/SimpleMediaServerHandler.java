@@ -53,11 +53,20 @@ public class SimpleMediaServerHandler extends SimpleChannelInboundHandler<FullHt
             sendError(ctx, FORBIDDEN);
             return;
         }
-
         File file = new File(path);
-        if (file.isHidden() || !file.exists()) {
-            sendError(ctx, NOT_FOUND);
-            return;
+        if (!file.isDirectory()) {
+            file = new File(path.endsWith("jpg") ? path : path  + ".jpg");
+            if (!file.exists()) {
+                file = new File(path.endsWith("jpeg") ? path : path  + ".jpeg");
+                if (!file.exists()) {
+                    file = new File(path.endsWith("png") ? path : path  + ".png");
+                }
+            }
+            if (file.isHidden() || !file.exists()) {
+                sendError(ctx, NOT_FOUND);
+                return;
+            }
+
         }
 
         if (file.isDirectory()) {
@@ -304,6 +313,14 @@ public class SimpleMediaServerHandler extends SimpleChannelInboundHandler<FullHt
      */
     private static void setContentTypeHeader(HttpResponse response, File file) {
         MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
-        response.headers().set(CONTENT_TYPE, mimeTypesMap.getContentType(file.getPath()));
+        if (file.getName().endsWith(".jpg") || file.getName().endsWith(".jpeg")) {
+            response.headers().set(CONTENT_TYPE, "image/jpg");
+        }
+        else if (file.getName().endsWith(".png")){
+            response.headers().set(CONTENT_TYPE, "image/png");
+        }
+        else {
+            response.headers().set(CONTENT_TYPE, mimeTypesMap.getContentType(file.getPath()));
+        }
     }
 }
