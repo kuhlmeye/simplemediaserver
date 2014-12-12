@@ -16,8 +16,6 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
  */
 public class SimpleMediaServer {
 
-
-
     static final boolean SSL = System.getProperty("ssl") != null;
     static final int PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8080"));
 
@@ -25,6 +23,7 @@ public class SimpleMediaServer {
         // Configure SSL.
         final SslContext sslCtx;
         if (SSL) {
+            System.out.println("Tets");
             SelfSignedCertificate ssc = new SelfSignedCertificate();
             sslCtx = SslContext.newServerContext(ssc.certificate(), ssc.privateKey());
         } else {
@@ -41,8 +40,13 @@ public class SimpleMediaServer {
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new SimpleMediaServerInitializer(sslCtx));
-
-            Channel ch = b.bind(PORT).sync().channel();
+            Integer port;
+            if (args.length > 0) {
+                port = Integer.valueOf(args[0]);
+            }else {
+                port = PORT;
+            }
+            Channel ch = b.bind(port).sync().channel();
 
             System.err.println("Open your web browser and navigate to " +
                     (SSL? "https" : "http") + "://127.0.0.1:" + PORT + '/');
@@ -53,5 +57,4 @@ public class SimpleMediaServer {
             workerGroup.shutdownGracefully();
         }
     }
-
 }
