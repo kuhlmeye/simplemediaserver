@@ -23,7 +23,6 @@ public class SimpleMediaServer {
         // Configure SSL.
         final SslContext sslCtx;
         if (SSL) {
-            System.out.println("Tets");
             SelfSignedCertificate ssc = new SelfSignedCertificate();
             sslCtx = SslContext.newServerContext(ssc.certificate(), ssc.privateKey());
         } else {
